@@ -1,0 +1,177 @@
+{
+  "name": "aws-n8n-rag-operate",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "13782aa1-07ab-4fcd-ac54-4b8756599509",
+      "name": "When chat message received",
+      "webhookId": "53614906-2f80-4387-a8b2-f92861f9c9d8"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an expert AI assistant specializing in Amazon Web Services (AWS). Your primary function is to answer user questions accurately by consulting a specialized knowledge base about AWS services.\n\nYou must use the following format to answer:\n\n\nThought: First, analyze the user's question. If it is about AWS, cloud computing, or a related technical topic, you MUST use your available tool. If it's a general greeting or off-topic, you can answer directly.\nAction: The name of the tool to use. This should be [{tool_names}].\nAction Input: A clear, concise question for the knowledge base, derived from the user's question.\nObservation: The information returned from the knowledge base.\nThought: I have retrieved the information. I will now synthesize this information to provide a comprehensive and accurate final answer.\nFinal Answer: The final, well-formatted"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9f2f7948-ddbc-47fa-9a09-1a563c2fcc53",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        304
+      ],
+      "id": "01e8bff0-2dbe-4141-9790-08aa41588125",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DmMxce15zrBjdbXq",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        304
+      ],
+      "id": "cc3a7d73-b25d-486c-ac27-c408a0ae8183",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "\"Useful for answering specific questions about cloud computing technologies. Use this tool when the user asks for definitions or explanations of terms related to the cloud.\"",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "was-n8n-rag",
+          "mode": "list",
+          "cachedResultName": "was-n8n-rag"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        208
+      ],
+      "id": "8f02f350-5956-4580-9219-89df5de59070",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "2t04u4zhOVrUuQm6",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        464,
+        368
+      ],
+      "id": "8868fc8a-17ec-4f98-9ae0-922f5932009c",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DmMxce15zrBjdbXq",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "42b1f0ca-2c6e-45e8-a679-ced47fba052e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e3bb598ee6f575fa341c68f7fde7759035c2bf8f2e13cb3813b67529c8b25b78"
+  },
+  "id": "vuQxVmXcuiILVlLx",
+  "tags": []
+}
